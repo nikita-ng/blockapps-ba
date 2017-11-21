@@ -4,23 +4,24 @@
 contract Product {
   string name;
   string id;
-  uint price;
+  int price;
 
   function Product(string _name, string _id) {
     name = _name;
     id = _id;
   }
 
-  function setPrice(uint _price) returns(bool) {
-    if(_price != 0) {
-      price = _price;
-      return true;
-    } else {
+  function setPrice(int _price) returns(bool) {
+    // should be positive
+    if(_price <= 0) {
       return false;
     }
+    // value valid
+    price = _price;
+    return true;
   }
 
-  function getPrice() returns(uint) {
+  function getPrice() returns(int) {
     return price;
   }
 }
