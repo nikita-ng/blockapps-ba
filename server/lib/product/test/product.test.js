@@ -27,6 +27,8 @@ describe('Product tests', function() {
       const id = util.uid('id_');
       const name = util.uid('name_');
       const price = 1234;
+
+      // function Product(string _name, string _id)
       const args = {
         _name : name,
         _id : id,
@@ -44,6 +46,7 @@ describe('Product tests', function() {
       const id = util.uid('id_');
       const name = util.uid('name_');
       const price = 1234;
+      // function Product(string _name, string _id)
       const args = {
         _name : name,
         _id : id,
@@ -83,5 +86,30 @@ describe('Product tests', function() {
       }
   });
 
+  it('Search Contracts', function* () {
+      const id = util.uid('id_');
+      const name = util.uid('name_');
+
+      // function Product(string _name, string _id)
+      const args = {
+        _name : name,
+        _id : id,
+      };
+      // create the product with constructor args
+      const contract = yield productJs.uploadContract(admin, args);
+      assert.isDefined(contract, "contract must be defined");
+      // search
+      const product = yield productJs.getProductById(id);
+      assert.equal(product.name, name, 'name');
+      assert.equal(product.id, id, 'id');
+
+      // search ALL
+      const products = yield productJs.getProducts();
+      const filtered = products.filter(product => {
+        return product.id == id;
+      });
+
+      assert.equal(filtered.length, 1, 'should find one and only one');
+  });
 
 });
