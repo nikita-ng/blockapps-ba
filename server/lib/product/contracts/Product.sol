@@ -11,7 +11,7 @@ contract Product {
     id = _id;
   }
 
-  function setPrice(int _price) returns(bool) {
+  function setPrice(int _price) payable returns(bool) {
     // should be positive
     if(_price <= 0) {
       return false;

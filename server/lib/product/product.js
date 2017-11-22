@@ -2,6 +2,9 @@ const ba = require('blockapps-rest');
 const rest = ba.rest;
 const util = ba.common.util;
 const config = ba.common.config;
+const common = ba.common;
+const BigNumber = common.BigNumber;
+const constants = common.constants;
 
 const contractName = 'Product';
 const contractFilename = `${config.libPath}/product/contracts/Product.sol`;
@@ -42,8 +45,10 @@ function* setPrice(admin, contract, price) {
   const args = {
     _price: price,
   };
-
-  const result = yield rest.callMethod(admin, contract, method, args);
+  //Converting value to ether
+  const etherValue = new BigNumber(price).mul(constants.ETHER);
+  //Argument for value added 
+  const result = yield rest.callMethod(admin, contract, method, args, etherValue);
   const isPriceSetted = (result[0] === true);
   return isPriceSetted;
 }
