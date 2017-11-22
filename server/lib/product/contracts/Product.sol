@@ -24,4 +24,9 @@ contract Product {
   function getPrice() returns(int) {
     return price;
   }
+
+  // fallback function - allow the contract to receive funds
+  function() payable {
+  }
+
 }
