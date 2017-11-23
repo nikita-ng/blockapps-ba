@@ -43,7 +43,7 @@ describe('Product tests', function() {
     assert.equal(product.price, 0, 'Initial Price');
   });
 
-  it.skip('get/set price', function*() {
+  it('get/set price', function*() {
     const id = util.uid('id_');
     const name = util.uid('name_');
     const price = 1234;
@@ -86,7 +86,7 @@ describe('Product tests', function() {
     }
   });
 
-  it('Search Contracts', function*() {
+  it.skip('Search Contracts', function*() {
     const id = util.uid('id_');
     const name = util.uid('name_');
 

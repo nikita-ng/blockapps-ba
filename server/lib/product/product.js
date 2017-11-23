@@ -45,10 +45,8 @@ function* setPrice(admin, contract, price) {
   const args = {
     _price: price,
   };
-  //Converting value to ether
-  const etherValue = new BigNumber(price).mul(constants.ETHER);
   //Argument for value added 
-  const result = yield rest.callMethod(admin, contract, method, args, etherValue);
+  const result = yield rest.callMethod(admin, contract, method, args);
   const isPriceSetted = (result[0] === true);
   return isPriceSetted;
 }
