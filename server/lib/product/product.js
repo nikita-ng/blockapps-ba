@@ -26,6 +26,9 @@ function setContract(admin, contract) {
   contract.getPrice = function* () {
     return yield getPrice(admin, contract);
   }
+  contract.pay = function* (toContract, amount) {
+    return yield pay(admin, contract, toContract, amount);
+  }
   return contract;
 }
 
@@ -44,8 +47,7 @@ function* setPrice(admin, contract, price) {
   const method = 'setPrice';
   const args = {
     _price: price,
-  };
-  //Argument for value added 
+  }; 
   const result = yield rest.callMethod(admin, contract, method, args);
   const isPriceSetted = (result[0] === true);
   return isPriceSetted;
@@ -71,6 +73,19 @@ function* getProductById(id) {
   const results = yield rest.waitQuery(`${contractName}?id=eq.${id}`, 1);
   const product = results[0];
   return product;
+}
+
+//Pay function for fund transfer
+function* pay(admin, fromContract, toContract, amount) {
+  rest.verbose('pay', amount);
+  const method = 'pay';
+  const args = {
+    _toAddress: toContract.address,
+    _amount: amount,
+  };
+  const result = yield rest.callMethod(admin, fromContract, method, args);
+  const isPaid = (result[0] === true);
+  return isPaid;
 }
 
 module.exports = {

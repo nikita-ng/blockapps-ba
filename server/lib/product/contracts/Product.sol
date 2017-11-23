@@ -11,7 +11,7 @@ contract Product {
     id = _id;
   }
 
-  function setPrice(int _price) payable returns(bool) {
+  function setPrice(int _price) returns(bool) {
     // should be positive
     if(_price <= 0) {
       return false;
@@ -27,6 +27,15 @@ contract Product {
 
   // fallback function - allow the contract to receive funds
   function() payable {
+  }
+
+  //Fund transfer from given product to toAddress product
+  function pay(address _toAddress, uint _amount) payable returns(bool) {
+    if(_amount > this.balance) {
+      return false;
+    }
+    _toAddress.send(_amount);
+    return true;
   }
 
 }
