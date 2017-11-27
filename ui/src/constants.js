@@ -23,6 +23,10 @@ export const STATES = {
     state: 'RECEIVED',
     icon: 'mood'
   },
+  5: {
+    state: 'REJECTED',
+    icon: 'mood_bad'
+  },
   OPEN: 1,
   PRODUCTION: 2,
   INTRANSIT: 3,
