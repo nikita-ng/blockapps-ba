@@ -24,7 +24,7 @@ describe('Product tests', function() {
     admin = yield rest.createUser(adminName, adminPassword);
   });
 
-  it.skip('Create Contract', function*() {
+  it('Create Contract', function*() {
     const id = util.uid('id_');
     const name = util.uid('name_');
     const price = 1234;
@@ -43,7 +43,7 @@ describe('Product tests', function() {
     assert.equal(product.price, 0, 'Initial Price');
   });
 
-  it.skip('get/set price', function*() {
+  it('get/set price', function*() {
     const id = util.uid('id_');
     const name = util.uid('name_');
     const price = 1234;
@@ -86,7 +86,7 @@ describe('Product tests', function() {
     }
   });
 
-  it.skip('Search Contracts', function*() {
+  it('Search Contracts', function*() {
     const id = util.uid('id_');
     const name = util.uid('name_');
 
@@ -161,14 +161,14 @@ describe('Product tests', function() {
 
     {
     //Case 1: Product A have balance < amount
-    const amount = new BigNumber(100000000);
+    const amount = new BigNumber(value * 1.5);
     const result = yield contract_A.pay(contract_B, amount);
     assert.isFalse(result, "Transfer fund not happened");
     }
 
     {
     //Case 2: Product A have balance >= amount
-    const amount = new BigNumber(100000);
+    const amount = new BigNumber(value * .5);
     const result = yield contract_A.pay(contract_B, amount);
     assert.isTrue(result, "Transfer fund happened");
     const balance_A_endBalance = yield rest.getBalance(contract_A.address);
