@@ -112,7 +112,7 @@ describe('Product tests', function() {
     assert.equal(filtered.length, 1, 'should find one and only one');
   });
 
-  it('Fund a contract', function*() {
+  it.only('Fund a contract', function*() {
 
     //PRODUCT_A
 
@@ -166,6 +166,22 @@ describe('Product tests', function() {
     assert.isFalse(result, "Transfer fund not happened");
     }
 
+    // {
+    // //Case 1.5: Product A have exact balance
+    // const amount = new BigNumber(value);
+    // const result = yield contract_A.pay(contract_B, amount);
+    // assert.isTrue(result, "Transfer fund happened");
+    //
+    // const balance_A_endBalance = yield rest.getBalance(contract_A.address);
+    // const balance_B_endBalance = yield rest.getBalance(contract_B.address);
+    //
+    // //Checking the final balance of Product_A
+    // balance_A_endBalance.should.be.bignumber.equal(balance_A_startingBalance-amount);
+    //
+    // //Checking the final balance of Product_B
+    // balance_B_endBalance.should.be.bignumber.equal(balance_B_startingBalance+amount);
+    // }
+
     {
     //Case 2: Product A have balance >= amount
     const amount = new BigNumber(value * .5);
@@ -173,7 +189,7 @@ describe('Product tests', function() {
     assert.isTrue(result, "Transfer fund happened");
     const balance_A_endBalance = yield rest.getBalance(contract_A.address);
     const balance_B_endBalance = yield rest.getBalance(contract_B.address);
-    
+
     //Checking the final balance of Product_A
     balance_A_endBalance.should.be.bignumber.equal(balance_A_startingBalance-amount);
 
