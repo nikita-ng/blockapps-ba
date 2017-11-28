@@ -522,7 +522,7 @@ describe('ProjectManager Life Cycle tests', function() {
     }
   });
 
-  it('Reject the bid', function* () {
+  it('Reject the project', function* () {
     const uid = util.uid();
     const projectArgs = createProjectArgs(uid);
     const password = '1234';
@@ -610,10 +610,8 @@ describe('ProjectManager Life Cycle tests', function() {
   // throws: ErrorCodes
   function* rejectProject(buyer, projectName) {
     rest.verbose('rejectProject', projectName);
-    // get the accepted bid
-    const acceptedBid = yield projectManagerJs.getAcceptedBid(projectName);
     // Reject the project:  change state to OPEN and tell the bid to send the funds back to buyer
-    yield contract.rejectProject(buyer, acceptedBid.id, projectName);
+    yield contract.rejectProject(buyer, projectName);
   }
 });
 
