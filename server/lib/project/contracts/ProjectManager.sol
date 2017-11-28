@@ -133,6 +133,8 @@ contract ProjectManager is ErrorCodes, Util, ProjectState, ProjectEvent, BidStat
     if (state == ProjectState.INTRANSIT) {
       if (projectEvent == ProjectEvent.RECEIVE)
         return (ErrorCodes.SUCCESS, ProjectState.RECEIVED);
+      if (projectEvent == ProjectEvent.FAULTY)
+        return (ErrorCodes.SUCCESS, ProjectState.OPEN);
     }
     return (ErrorCodes.ERROR, state);
   }
