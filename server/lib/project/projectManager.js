@@ -59,8 +59,8 @@ function setContract(admin, contract) {
   contract.acceptBid = function* (buyer, bidId, name) {
     return yield acceptBid(admin, contract, buyer, bidId, name);
   }
-  contract.rejectProject = function* (buyer, name) {
-    return yield rejectProject(admin, contract, buyer, name);
+  contract.rejectProject = function* (projectName, buyerAddress, bidAddress) {
+    return yield rejectProject(admin, contract, projectName, buyerAddress, bidAddress);
   }
   contract.settleProject = function* (projectName, supplierAddress, bidAddress) {
     return yield settleProject(admin, contract, projectName, supplierAddress, bidAddress);
@@ -167,25 +167,6 @@ function* acceptBid(admin, contract, buyer, bidId, name) {   // FIXME should go 
   return result;
 }
 
-// throws: ErrorCodes
-function* rejectProject(admin, contract, buyer, name) {
-  rest.verbose('rejectProject', {admin, buyer, name});
-  const winningBid = yield getAcceptedBid(name);
-  // reject the bid (will transfer funds from bid contract to buyer)
-  try {
-    yield setBidState(buyer, winningBid.address, BidState.REJECTED);
-  } catch(error) {
-    // check insufficient balance
-    console.log(error.status);
-    if (error.status == 400) {
-      throw new Error(ErrorCodes.INSUFFICIENT_BALANCE);
-    }
-    throw error;
-  }
-  const result = yield handleEvent(admin, contract, name, ProjectEvent.FAULTY);
-  return result;
-}
-
 function* setBidState(buyer, bidAddress, state, valueEther) {
   rest.verbose('setBidState', {buyer, bidAddress, state, valueEther});
   const contract = {
@@ -205,19 +186,11 @@ function* setBidState(buyer, bidAddress, state, valueEther) {
     address: buyer.account,
   };
 
-  if(valueEther) {
-    const valueWei = new BigNumber(valueEther).mul(constants.ETHER);
-    const result = yield rest.callMethod(buyerAccount, contract, method, args, valueWei);
-    const errorCode = parseInt(result[0]);
-    if (errorCode != ErrorCodes.SUCCESS) {
-      throw new Error(errorCode);
-    }
-  } else {
-    const result = yield rest.callMethod(buyerAccount, contract, method, args);
-    const errorCode = parseInt(result[0]);
-    if (errorCode != ErrorCodes.SUCCESS) {
-      throw new Error(errorCode);
-    }
+  const valueWei = new BigNumber(valueEther).mul(constants.ETHER);
+  const result = yield rest.callMethod(buyerAccount, contract, method, args, valueWei);
+  const errorCode = parseInt(result[0]);
+  if (errorCode != ErrorCodes.SUCCESS) {
+    throw new Error(errorCode);
   }
 }
 
@@ -236,6 +209,24 @@ function* settleProject(admin, contract, projectName, supplierAddress, bidAddres
   if (errorCode != ErrorCodes.SUCCESS) {
     throw new Error(errorCode);
   }
+}
+
+// throws: ErrorCodes
+function* rejectProject(admin, contract, projectName, buyerAddress, bidAddress) {
+  rest.verbose('rejectProject', {projectName, buyerAddress, bidAddress});
+  // function rejectProject(string name, address buyerAddress, address bidAddress) returns (ErrorCodes) {
+    const method = 'rejectProject';
+    const args = {
+      name: projectName,
+      buyerAddress: buyerAddress,
+      bidAddress: bidAddress,
+    };
+  
+    const result = yield rest.callMethod(admin, contract, method, args);
+    const errorCode = parseInt(result[0]);
+    if (errorCode != ErrorCodes.SUCCESS) {
+      throw new Error(errorCode);
+    }
 }
 
 function* getBid(bidId) {

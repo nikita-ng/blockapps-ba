@@ -5,6 +5,6 @@ contract ProjectEvent {
         ACCEPT,
         DELIVER,
         RECEIVE,
-        FAULTY
+        REJECT
     }
 }

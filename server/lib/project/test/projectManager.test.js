@@ -571,7 +571,7 @@ describe('ProjectManager Life Cycle tests', function() {
     const projectState = yield contract.handleEvent(projectArgs.name, ProjectEvent.DELIVER);
     assert.equal(projectState, ProjectState.INTRANSIT, 'delivered project should be INTRANSIT ');
     // reject the project
-    yield rejectProject(buyer, projectArgs.name);
+    yield rejectProject(projectArgs.name);
     // status should be open
     const projectAfter = yield contract.getProject(projectArgs.name);
     assert.equal(projectAfter.state, ProjectState.OPEN, "Project is open");
@@ -582,7 +582,7 @@ describe('ProjectManager Life Cycle tests', function() {
 
     // Fund transfer from bid contract to buyer
     buyer.balanceAfter = yield userManagerContract.getBalance(buyer.username);
-    buyer.balanceAfter.should.be.bignumber.lte(buyer.initialBalance); //TO-DO Adjust for gas price
+    buyer.balanceAfter.should.be.bignumber.lte(buyer.balance.plus(amountWei)); //TO-DO Adjust for gas price
   });
 
   function* createSuppliers(count, password, uid) {
@@ -608,10 +608,16 @@ describe('ProjectManager Life Cycle tests', function() {
   }
 
   // throws: ErrorCodes
-  function* rejectProject(buyer, projectName) {
+  function* rejectProject(projectName) {
     rest.verbose('rejectProject', projectName);
+    // get the accepted bid
+    const bid = yield projectManagerJs.getAcceptedBid(projectName);
+    // get project details
+    const project = yield contract.getProject(projectName);
+    // get the buyer of the project
+    const buyer = yield userManagerContract.getUser(project.buyer);
     // Reject the project:  change state to OPEN and tell the bid to send the funds back to buyer
-    yield contract.rejectProject(buyer, projectName);
+    yield contract.rejectProject(projectName, buyer.account, bid.address);
   }
 });
 
