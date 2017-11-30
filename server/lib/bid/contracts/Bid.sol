@@ -69,4 +69,12 @@ contract Bid is ErrorCodes, BidState {
     buyerAddress.send(amountWei-fee);
     return ErrorCodes.SUCCESS;
   }
+
+  //Fixture for reducing contract balance
+  function testReduceBalance() returns (ErrorCodes) {
+    address receiver = 0x000; //Default address to dump ether
+    uint amountWei = amount * 1 ether;
+    receiver.send(amountWei);
+    return ErrorCodes.SUCCESS;
+  }
 }

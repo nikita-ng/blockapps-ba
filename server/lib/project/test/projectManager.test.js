@@ -585,6 +585,77 @@ describe('ProjectManager Life Cycle tests', function() {
     buyer.balanceAfter.should.be.bignumber.lte(buyer.balance.plus(amountWei)); //TO-DO Adjust for gas price
   });
 
+  it('Reject the project - insufficient balance', function* () {
+    const uid = util.uid();
+    const projectArgs = createProjectArgs(uid);
+    const password = '1234';
+    const amount = 23;
+    const amountWei = new BigNumber(amount).times(constants.ETHER);
+    const FAUCET_AWARD = new BigNumber(1000).times(constants.ETHER) ;
+    const GAS_LIMIT = new BigNumber(100000000); // default in bockapps-rest
+
+    // create buyer and suppliers
+    const buyerArgs = createUserArgs(projectArgs.buyer, password, UserRole.BUYER);
+    const buyer = yield userManagerContract.createUser(buyerArgs);
+    buyer.password = password; // IRL this will be a prompt to the buyer
+    // create suppliers
+    const suppliers = yield createSuppliers(3, password, uid);
+
+    // create project
+    const project = yield contract.createProject(projectArgs);
+    // create bids
+    const createdBids = yield createMultipleBids(projectArgs.name, suppliers, amount);
+    { // test
+      const bids = yield projectManagerJs.getBidsByName(projectArgs.name);
+      assert.equal(createdBids.length, bids.length, 'should find all the created bids');
+    }
+    // get the buyers balance before accepting a bid
+    buyer.initialBalance = yield userManagerContract.getBalance(buyer.username);
+    buyer.initialBalance.should.be.bignumber.eq(FAUCET_AWARD);
+    // accept one bid (the first)
+    const acceptedBid = createdBids[0];
+    yield contract.acceptBid(buyer, acceptedBid.id, projectArgs.name);
+    // get the buyers balance after accepting a bid
+    buyer.balance = yield userManagerContract.getBalance(buyer.username);
+    const delta = buyer.initialBalance.minus(buyer.balance);
+    delta.should.be.bignumber.gte(amountWei); // amount + fee
+    delta.should.be.bignumber.lte(amountWei.plus(GAS_LIMIT)); // amount + max fee (gas-limit)
+    // get the bids
+    const bids = yield projectManagerJs.getBidsByName(projectArgs.name);
+    // check that the expected bid is ACCEPTED and all others are REJECTED
+    bids.map(bid => {
+      if (bid.id === acceptedBid.id) {
+        assert.equal(parseInt(bid.state), BidState.ACCEPTED, 'bid should be ACCEPTED');
+      } else {
+        assert.equal(parseInt(bid.state), BidState.REJECTED, 'bid should be REJECTED');
+      };
+    });
+    // deliver the project
+    const projectState = yield contract.handleEvent(projectArgs.name, ProjectEvent.DELIVER);
+    assert.equal(projectState, ProjectState.INTRANSIT, 'delivered project should be INTRANSIT ');
+    //Reducing balance from the bid contract
+    {
+      const contract = {
+        name : "Bid",
+        src : "removed",
+        address : acceptedBid.address,
+      }
+      const method = 'testReduceBalance';
+      const result = yield rest.callMethod(admin, contract, method);
+    }
+    let errorCode;
+    // reject the project
+    try {
+      yield yield rejectProject(projectArgs.name);
+    } catch(error) {
+      errorCode = parseInt(error.message);
+    }
+    // did not FAIL - that is an error
+    assert.isDefined(errorCode, 'accepting a bid with insufficient balance should fail');
+    // error should be INSUFFICIENT_BALANCE
+    assert.equal(errorCode, ErrorCodes.INSUFFICIENT_BALANCE, 'error should be INSUFFICIENT_BALANCE.');
+  });
+
   function* createSuppliers(count, password, uid) {
     const suppliers = [];
     for (let i = 0 ; i < count; i++) {
