@@ -194,10 +194,23 @@ describe("Projects Test", function() {
     this.timeout(config.timeout);
     chai.request(server)
       .post('/api/v1/projects/' + projectArgs.name + '/events')
-      .send({projectEvent: ProjectEvent.RECEIVE})
+      .send({projectEvent: ProjectEvent.RECEIVE, username: projectArgs.buyer}) //Username required for API
       .end((err, res) => {
         const data = assert.apiData(err, res); // FIXME -LS return value
-        assert.equal(data.bid.state, ProjectState.RECEIVED, 'returned state should be RECEIVED');
+        assert.isTrue(res.body.success, 'Project state changed to RECEIVED'); // Success checked
+        done();
+      });
+  });
+
+  // Reject project
+  it('should reject project and change project state to OPEN', function(done) {
+    this.timeout(config.timeout);
+    chai.request(server)
+      .post('/api/v1/projects/' + projectArgs.name + '/events')
+      .send({projectEvent: ProjectEvent.REJECT, username: projectArgs.buyer}) //Username required for API
+      .end((err, res) => {
+        const data = assert.apiData(err, res); // FIXME -LS return value
+        assert.isTrue(res.body.success, 'Project state changed to OPEN'); // Success checked
         done();
       });
   });
@@ -206,7 +219,7 @@ describe("Projects Test", function() {
 
 function createProjectArgs(uid) {
   const projectArgs = {
-    name: 'Project_ ? ' + uid,
+    name: 'Project' + uid, // Project name changed as its giving error in receive/reject project url
     buyer: 'Buyer1',
     description: 'description_ ? % ' + uid,
     spec: 'spec_ ? % ' + uid,
