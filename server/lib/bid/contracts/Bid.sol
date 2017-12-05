@@ -37,6 +37,10 @@ contract Bid is ErrorCodes, BidState {
       setState(newState);
       return ErrorCodes.SUCCESS;
     }
+    if (state == BidState.ACCEPTED  &&  newState == BidState.REJECTED) {
+      setState(newState);
+      return ErrorCodes.SUCCESS;
+    }
     return ErrorCodes.ERROR;
   }
 
@@ -50,6 +54,27 @@ contract Bid is ErrorCodes, BidState {
 
     // transfer will throw
     supplierAddress.send(amountWei-fee);
+    return ErrorCodes.SUCCESS;
+  }
+
+  function reject(address buyerAddress) returns (ErrorCodes) {
+    // confirm balance, to return error
+    if (this.balance < amount) {
+      return ErrorCodes.INSUFFICIENT_BALANCE;
+    }
+    uint fee = 10000000 wei; // buyer absorbs the fee
+    uint amountWei = amount * 1 ether;
+
+    // transfer will throw
+    buyerAddress.send(amountWei-fee);
+    return ErrorCodes.SUCCESS;
+  }
+
+  //Fixture for reducing contract balance
+  function testReduceBalance() returns (ErrorCodes) {
+    address receiver = 0x000; //Default address to dump ether
+    uint amountWei = amount * 1 ether;
+    receiver.send(amountWei);
     return ErrorCodes.SUCCESS;
   }
 }

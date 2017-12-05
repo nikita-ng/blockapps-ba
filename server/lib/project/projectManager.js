@@ -59,6 +59,9 @@ function setContract(admin, contract) {
   contract.acceptBid = function* (buyer, bidId, name) {
     return yield acceptBid(admin, contract, buyer, bidId, name);
   }
+  contract.rejectProject = function* (projectName, buyerAddress, bidAddress) {
+    return yield rejectProject(admin, contract, projectName, buyerAddress, bidAddress);
+  }
   contract.settleProject = function* (projectName, supplierAddress, bidAddress) {
     return yield settleProject(admin, contract, projectName, supplierAddress, bidAddress);
   }
@@ -206,6 +209,24 @@ function* settleProject(admin, contract, projectName, supplierAddress, bidAddres
   if (errorCode != ErrorCodes.SUCCESS) {
     throw new Error(errorCode);
   }
+}
+
+// throws: ErrorCodes
+function* rejectProject(admin, contract, projectName, buyerAddress, bidAddress) {
+  rest.verbose('rejectProject', {projectName, buyerAddress, bidAddress});
+  // function rejectProject(string name, address buyerAddress, address bidAddress) returns (ErrorCodes) {
+    const method = 'rejectProject';
+    const args = {
+      name: projectName,
+      buyerAddress: buyerAddress,
+      bidAddress: bidAddress,
+    };
+  
+    const result = yield rest.callMethod(admin, contract, method, args);
+    const errorCode = parseInt(result[0]);
+    if (errorCode != ErrorCodes.SUCCESS) {
+      throw new Error(errorCode);
+    }
 }
 
 function* getBid(bidId) {

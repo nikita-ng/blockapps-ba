@@ -4,6 +4,7 @@ contract ProjectEvent {
         NULL,
         ACCEPT,
         DELIVER,
-        RECEIVE
+        RECEIVE,
+        REJECT
     }
 }

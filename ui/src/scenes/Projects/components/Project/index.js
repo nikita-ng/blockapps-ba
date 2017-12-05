@@ -34,7 +34,7 @@ class Project extends Component {
 
   handleProjectEventClick = function(e, projectName, projectEvent) {
     e.stopPropagation();
-    // project events enum: { NULL, ACCEPT, DELIVER, RECEIVE }
+    // project events enum: { NULL, ACCEPT, DELIVER, RECEIVE, REJECT }
     const location = 'project_event_' + projectEvent;
     mixpanel.track(location);
     this.props.projectEvent(projectName, projectEvent, this.props.login['username']);
@@ -67,6 +67,17 @@ class Project extends Component {
                 key="mood"
               >
                 mood
+              </Button>
+            );
+            actions.push(
+              <Button
+                icon
+                primary
+                onClick={(e) => this.handleProjectEventClick(e, project.name, 4)}
+                tooltipLabel="Mark as Rejected"
+                key="mood_bad"
+              >
+                mood_bad
               </Button>
             );
         }
