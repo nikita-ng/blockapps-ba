@@ -18,7 +18,8 @@ import { showLoading, hideLoading } from 'react-redux-loading-bar';
 // TODO: define API endpoint for projects
 const url = API_URL + '/projects/:name/bids';
 
-function getBids(name){
+//Accessing the method outside
+export function getBids(name){
   if(API_MOCK) {
     return new Promise(function(resolve, reject){
       resolve({
