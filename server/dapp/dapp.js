@@ -99,6 +99,11 @@ function* setContract(admin, contract) {
     return yield deploy(admin, contract, userManager, dataFilename, deployFilename);
   }
 
+  // deploy project
+  contract.deployProject = function* (dataFilename, deployFilename) {
+    return yield deployProject(admin, contract, userManager, projectManager, dataFilename, deployFilename);
+  }
+
   return contract;
 }
 
@@ -162,6 +167,25 @@ function* handleEvent(userManager, projectManager, args) {
     }
 }
 
+//Creating preset projects
+function* createPresetProjects(projectManager, presetProjects) {
+  const projects = [];
+  for (let presetProject of presetProjects) {
+    const args = {
+      name: presetProject.name,
+      buyer: presetProject.buyer,
+      description: presetProject.description,
+      spec: presetProject.spec,
+      price: presetProject.price,
+      created: presetProject.created,
+      targetDelivery: presetProject.targetDelivery,
+    }
+    const project = yield projectManager.createProject(args);
+    projects.push(project);
+  }
+  return projects;
+}
+
 function* createPresetUsers(userManager, presetUsers) {
   const UserRole = rest.getEnums(`${config.libPath}/user/contracts/UserRole.sol`).UserRole;
   const users = [];
@@ -175,6 +199,16 @@ function* createPresetUsers(userManager, presetUsers) {
     users.push(user);
   }
   return users;
+}
+
+//Creating preset bids
+function* createPresetBids(projectManager, presetBids) {
+  const bids = [];
+  for (let presetBid of presetBids) {
+    const bid = yield projectManager.createBid(presetBid.name, presetBid.supplier, presetBid.amount);
+    bids.push(bid);
+  }
+  return bids;
 }
 
 function* deploy(admin, contract, userManager, presetDataFilename, deployFilename) {
@@ -196,6 +230,41 @@ function* deploy(admin, contract, userManager, presetDataFilename, deployFilenam
       address: contract.address,
     },
     users: presetData.users,
+  };
+  // write
+  console.log('deploy filename:', deployFilename);
+  console.log(fsutil.yamlSafeDumpSync(deployment));
+
+  fsutil.yamlWrite(deployment, deployFilename);
+  return deployment;
+}
+
+//Deploy project for bid count deployment script
+function* deployProject(admin, contract, userManager, projectManager, presetDataFilename, deployFilename) {
+  rest.verbose('dapp: deploy', {presetDataFilename, deployFilename});
+  const fsutil = ba.common.fsutil;
+
+  const presetData = fsutil.yamlSafeLoadSync(presetDataFilename);
+  if (presetData === undefined) throw new Error('Preset data read failed ' + presetDataFilename);
+  console.log('Preset data', JSON.stringify(presetData, null, 2));
+
+  // create preset users
+  const users = yield createPresetUsers(userManager, presetData.users);
+  // cretae preset projects
+  const projects = yield createPresetProjects(projectManager, presetData.projects); 
+  //create preset bids
+  const bids = yield createPresetBids(projectManager, presetData.bids); 
+  
+  const deployment = {
+    url: config.getBlocUrl(),
+    admin: admin,
+    contract: {
+      name: contract.name,
+      address: contract.address,
+    },
+    users: presetData.users,
+    projects: presetData.projects,
+    bids: presetData.bids,
   };
   // write
   console.log('deploy filename:', deployFilename);
