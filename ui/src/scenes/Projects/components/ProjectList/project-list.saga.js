@@ -16,6 +16,8 @@ import {
   fetchProjectListFailure
 } from './project-list.actions';
 import { showLoading, hideLoading } from 'react-redux-loading-bar';
+//Importing the getBids method for bid-count
+import {getBids} from '../Project/components/Bids/components/BidTable/sagas/projectBids.saga';
 
 const url = API_URL + '/projects?{0}';
 
@@ -108,6 +110,12 @@ function* fetchProjectList(action) {
   try {
     yield put(showLoading());
     let response = yield call(getProjectList, action.listType, action.username);
+    //Getting bid-count from getBids function
+    yield response.data.projects.map(function(elem) {
+      return getBids(elem.name).then(function(result) {
+        elem.bidCount = result.data.bids.length;
+      });
+    });
     yield put(hideLoading());
     yield put(fetchProjectListSuccess(action.listType, response.data['projects']));
   }

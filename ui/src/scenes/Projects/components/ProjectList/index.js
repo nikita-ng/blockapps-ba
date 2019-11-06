@@ -73,6 +73,11 @@ class ProjectList extends Component {
               : ''
             }
           </TableColumn>
+          {this.props.listType === "buyer" ? //Checking the Buyer
+            <TableColumn>
+              {project.bidCount}
+            </TableColumn> : 
+            null}
           {/*<TableColumn>*/}
             {/*{*/}
               {/*project.deliveryAddress && project.deliveryAddress.city && project.deliveryAddress.state*/}
@@ -102,6 +107,11 @@ class ProjectList extends Component {
               <TableColumn>Name</TableColumn>
               <TableColumn>Desired Price</TableColumn>
               <TableColumn>Deliver by</TableColumn>
+              {this.props.listType === "buyer" ? //Checking the Buyer
+                <TableColumn>
+                  Bid Count
+                </TableColumn> : 
+                null}
               {/*<TableColumn>Location</TableColumn>*/}
               <TableColumn>Status</TableColumn>
             </TableRow>
